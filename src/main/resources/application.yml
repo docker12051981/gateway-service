@@ -1,0 +1,81 @@
+server:
+  port: 9191
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - DELETE
+              - PUT
+            allowedHeaders:
+              - Content-Type
+              - origin
+      routes:
+        - id: FONCTIONNAIRE-SERVICE
+          uri: lb://FONCTIONNAIRE-SERVICE
+          predicates:
+            - Path=/fonctionnaires/**
+          filters:
+            - AuthFilter
+        - id: STRUCTURE-SERVICE
+          uri: lb://STRUCTURE-SERVICE
+          predicates:
+            - Path=/structures/**
+          filters:
+            - AuthFilter
+        - id: CONTRAT-SERVICE
+          uri: lb://CONTRAT-SERVICE
+          predicates:
+            - Path=/contrats/**
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - AuthFilter
+        - id: LOGIN-SERVICE
+          uri: lb://LOGIN-SERVICE
+          predicates:
+            - Path=/login/**
+
+
+management:
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+      circuitbreakers:
+       enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      annuaireCB:
+        registerHealthIndicator: true
+
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#    hostname: eureka-0
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://eureka-0.eureka.default.svc.cluster.local:8761/eureka
